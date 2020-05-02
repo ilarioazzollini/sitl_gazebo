@@ -1,0 +1,8 @@
+syntax = "proto2";
+package sensor_msgs.msgs;
+
+message Arva
+{
+  required int64  time_usec     = 1;
+  required double arva_val	= 2;
+}
