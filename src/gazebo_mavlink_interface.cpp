@@ -61,6 +61,7 @@ void GazeboMavlinkInterface::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf
   getSdfParam<std::string>(_sdf, "irlockSubTopic", irlock_sub_topic_, irlock_sub_topic_);
   getSdfParam<std::string>(_sdf, "magSubTopic", mag_sub_topic_, mag_sub_topic_);
   getSdfParam<std::string>(_sdf, "baroSubTopic", baro_sub_topic_, baro_sub_topic_);
+  getSdfParam<std::string>(_sdf, "arvaSubTopic", arva_sub_topic_, arva_sub_topic_);
   groundtruth_sub_topic_ = "/groundtruth";
 
   // set input_reference_ from inputs.control
@@ -279,6 +280,7 @@ void GazeboMavlinkInterface::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf
   vision_sub_ = node_handle_->Subscribe("~/" + model_->GetName() + vision_sub_topic_, &GazeboMavlinkInterface::VisionCallback, this);
   mag_sub_ = node_handle_->Subscribe("~/" + model_->GetName() + mag_sub_topic_, &GazeboMavlinkInterface::MagnetometerCallback, this);
   baro_sub_ = node_handle_->Subscribe("~/" + model_->GetName() + baro_sub_topic_, &GazeboMavlinkInterface::BarometerCallback, this);
+  arva_sub_ = node_handle_->Subscribe("~/" + model_->GetName() + arva_sub_topic_, &GazeboMavlinkInterface::ArvaCallback, this);
 
   // Publish gazebo's motor_speed message
   motor_velocity_reference_pub_ = node_handle_->Advertise<mav_msgs::msgs::CommandMotorSpeed>("~/" + model_->GetName() + motor_velocity_reference_pub_topic_, 1);
@@ -845,6 +847,20 @@ void GazeboMavlinkInterface::SendSensorMessages()
     mavlink_msg_hil_state_quaternion_encode_chan(1, 200, MAVLINK_COMM_0, &msg, &hil_state_quat);
     send_mavlink_message(&msg);
   }
+}
+
+void GazeboMavlinkInterface::ArvaCallback(ArvaPtr& arva_msg) {
+ // fill HIL ARVA Mavlink msg
+ mavlink_hil_arva_t hil_arva_msg;
+ hil_arva_msg.time_usec = arva_msg->time_usec();
+ hil_arva_msg.arva_val = arva_msg->arva_val();
+
+ // send HIL_ARVA Mavlink msg
+ if (!hil_mode_ || (hil_mode_ && !hil_state_level_)) {
+ mavlink_message_t msg;
+ mavlink_msg_hil_arva_encode_chan(1, 200, MAVLINK_COMM_0, &msg, &hil_arva_msg);
+ send_mavlink_message(&msg);
+ }
 }
 
 void GazeboMavlinkInterface::GpsCallback(GpsPtr& gps_msg) {

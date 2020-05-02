@@ -70,6 +70,8 @@
 #include <mavlink/v2.0/common/mavlink.h>
 #include "msgbuffer.h"
 
+#include <Arva.pb.h>
+
 static const uint32_t kDefaultMavlinkUdpPort = 14560;
 static const uint32_t kDefaultMavlinkTcpPort = 4560;
 static const uint32_t kDefaultQGCUdpPort = 14550;
@@ -96,6 +98,7 @@ typedef const boost::shared_ptr<const sensor_msgs::msgs::Range> LidarPtr;
 typedef const boost::shared_ptr<const sensor_msgs::msgs::SITLGps> GpsPtr;
 typedef const boost::shared_ptr<const sensor_msgs::msgs::MagneticField> MagnetometerPtr;
 typedef const boost::shared_ptr<const sensor_msgs::msgs::Pressure> BarometerPtr;
+typedef const boost::shared_ptr<const sensor_msgs::msgs::Arva> ArvaPtr;
 
 // Default values
 static const std::string kDefaultNamespace = "";
@@ -113,6 +116,7 @@ static const std::string kDefaultGPSTopic = "/gps";
 static const std::string kDefaultVisionTopic = "/vision_odom";
 static const std::string kDefaultMagTopic = "/mag";
 static const std::string kDefaultBarometerTopic = "/baro";
+static const std::string kDefaultArvaTopic = "/arva";
 
 //! Rx packer framing status. (same as @p mavlink::mavlink_framing_t)
 enum class Framing : uint8_t {
@@ -142,6 +146,7 @@ public:
     sonar_sub_topic_(kDefaultSonarTopic),
     irlock_sub_topic_(kDefaultIRLockTopic),
     gps_sub_topic_(kDefaultGPSTopic),
+    arva_sub_topic_(kDefaultArvaTopic),
     vision_sub_topic_(kDefaultVisionTopic),
     mag_sub_topic_(kDefaultMagTopic),
     baro_sub_topic_(kDefaultBarometerTopic),
@@ -264,6 +269,7 @@ private:
   void handle_control(double _dt);
   bool IsRunning();
   void onSigInt();
+  void ArvaCallback(ArvaPtr& arva_msg);
 
   /**
    * @brief Set the MAV_SENSOR_ORIENTATION enum value based on the sensor orientation
@@ -306,6 +312,7 @@ private:
   transport::SubscriberPtr vision_sub_;
   transport::SubscriberPtr mag_sub_;
   transport::SubscriberPtr baro_sub_;
+  transport::SubscriberPtr arva_sub_;
 
   std::string imu_sub_topic_;
   std::string lidar_sub_topic_;
@@ -317,6 +324,7 @@ private:
   std::string vision_sub_topic_;
   std::string mag_sub_topic_;
   std::string baro_sub_topic_;
+  std::string arva_sub_topic_;
 
   std::mutex last_imu_message_mutex_ {};
   std::condition_variable last_imu_message_cond_ {};
