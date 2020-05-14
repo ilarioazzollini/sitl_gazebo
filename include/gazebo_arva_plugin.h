@@ -72,6 +72,8 @@ private:
   sensor_msgs::msgs::Arva arva_msg;
   common::Time last_time_;
 
+  static constexpr double arva_update_interval_ = 1; // 1Hz
+
   std::string frame_id_;
   std::string link_name_; 
 
