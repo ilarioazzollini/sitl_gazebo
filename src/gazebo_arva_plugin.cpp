@@ -153,7 +153,7 @@ void ArvaPlugin::OnUpdate(const common::UpdateInfo&){
   // Compute ARVA Function
   double y = 1/cbrt(H.norm());
 
-  // publish Arva msg // FREQUENZA DI PUBLISH???
+  // publish Arva msg
   if((current_time - last_time_).Double() > arva_update_interval_){
     last_time_ = current_time;
   
