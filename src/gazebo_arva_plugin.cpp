@@ -130,7 +130,7 @@ void ArvaPlugin::OnUpdate(const common::UpdateInfo&){
   Eigen::Matrix<double, 3, 1> H = (A*Rt*e1)/(4*M_PI*pow(p.norm(), 5));
 
   // Add Floor Noise
-  static std::default_random_engine realXGenerator, realYGenerator, realNGenerator;
+  static std::default_random_engine realGenerator;
   static std::default_random_engine intGenerator;
   std::uniform_real_distribution<double>  realDistribution(-1.0,1.0);
   std::uniform_int_distribution<int>      intDistribution(0,1);
@@ -142,18 +142,18 @@ void ArvaPlugin::OnUpdate(const common::UpdateInfo&){
   rNoise = 80;
   nNoise = kNoise/(4*M_PI*pow(rNoise, 3));
 
-  xNoise = realDistribution(realXGenerator);
-  yNoise = realDistribution(realYGenerator)*sqrt(1 - pow(xNoise, 2));
+  xNoise = realDistribution(realGenerator);
+  yNoise = realDistribution(realGenerator)*sqrt(1 - pow(xNoise, 2));
   zNoise = pow(-1, intDistribution(intGenerator))*sqrt(1- pow(xNoise, 2) - pow(yNoise, 2));
 
   hNoise << xNoise, yNoise, zNoise;
 
-  H += hNoise*nNoise*realDistribution(realNGenerator);
+  H += hNoise*nNoise*realDistribution(realGenerator);
 
   // Compute ARVA Function
   double y = 1/cbrt(H.norm());
 
-  // publish Arva msg // FREQUENZA DI PUBLISH???
+  // publish Arva msg
   if((current_time - last_time_).Double() > arva_update_interval_){
     last_time_ = current_time;
   
